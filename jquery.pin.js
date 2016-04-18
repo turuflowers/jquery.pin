@@ -12,7 +12,6 @@
                 if (options.minWidth && $window.width() <= options.minWidth) {
                     if ($this.parent().is(".pin-wrapper")) { $this.unwrap(); }
                     $this.css({width: "", left: "", top: "", position: ""});
-                    if (options.activeClass) { $this.removeClass(options.activeClass); }
                     disabled = true;
                     continue;
                 } else {
@@ -28,20 +27,14 @@
                     $this.wrap("<div class='pin-wrapper'>");
                 }
 
-                var pad = $.extend({
-                  top: 0,
-                  bottom: 0
-                }, options.padding || {});
-
                 $this.data("pin", {
-                    pad: pad,
-                    from: (options.containerSelector ? containerOffset.top : offset.top) - pad.top,
-                    to: containerOffset.top + $container.height() - $this.outerHeight() - pad.bottom,
+                    from: options.containerSelector ? containerOffset.top : offset.top,
+                    to: containerOffset.top + $container.height() - $this.outerHeight(),
                     end: containerOffset.top + $container.height(),
                     parentTop: parentOffset.top
                 });
 
-                $this.css({width: $this.outerWidth()});
+                $this.css({width: $this.parent().outerWidth()});
                 $this.parent().css("height", $this.outerHeight());
             }
         };
@@ -51,49 +44,37 @@
 
             scrollY = $window.scrollTop();
 
-            var elmts = [];
-            for (var i=0, len=elements.length; i<len; i++) {          
+            for (var i=0, len=elements.length; i<len; i++) {
                 var $this = $(elements[i]),
-                    data  = $this.data("pin");
+                    data  = $this.data("pin"),
+                    from  = data.from  - options.padding.top,
+                    to    = data.to  - options.padding.top;
 
-                if (!data) { // Removed element
-                  continue;
-                }
-
-                elmts.push($this); 
-                  
-                var from = data.from - data.pad.bottom,
-                    to = data.to - data.pad.top;
-              
                 if (from + $this.outerHeight() > data.end) {
                     $this.css('position', '');
                     continue;
                 }
-              
+
                 if (from < scrollY && to > scrollY) {
                     !($this.css("position") == "fixed") && $this.css({
                         left: $this.offset().left,
-                        top: data.pad.top
+                        top: 0  + options.padding.top
                     }).css("position", "fixed");
-                    if (options.activeClass) { $this.addClass(options.activeClass); }
                 } else if (scrollY >= to) {
                     $this.css({
-                        left: "",
-                        top: to - data.parentTop + data.pad.top
+                        left: "auto",
+                        top: to - data.parentTop
                     }).css("position", "absolute");
-                    if (options.activeClass) { $this.addClass(options.activeClass); }
                 } else {
                     $this.css({position: "", top: "", left: ""});
-                    if (options.activeClass) { $this.removeClass(options.activeClass); }
                 }
           }
-          elements = elmts;
         };
 
         var update = function () { recalculateLimits(); onScroll(); };
 
         this.each(function () {
-            var $this = $(this), 
+            var $this = $(this),
                 data  = $(this).data('pin') || {};
 
             if (data && data.update) { return; }
