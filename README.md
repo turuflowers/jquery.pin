@@ -17,6 +17,10 @@ To make a pinned element stay within an outer container, use the containerSelect
         fixedHeaderSelector: "header"
         })
 
+Padding can also be added around the pinned element while scrolling:
+
+    $(".pinned").pin({padding: {top: 10, bottom: 10}})
+
 That's it - go pin all the things!
 
 ## Examples
